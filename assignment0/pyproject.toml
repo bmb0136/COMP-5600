@@ -7,4 +7,4 @@ dependencies = [
 ]
 
 [project.scripts]
-cli = "main:main"
+assignment0 = "main:main"
