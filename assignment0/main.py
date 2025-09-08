@@ -54,8 +54,8 @@ def problem2():
 # Problem 3
 
 - Create two NumPy arrays:
-    - One for $x$ values ranging from $0$ to $100$ with an increment of $1$
-    - Another for $y$ values that represent a quadratic function $y=0.5x^2+2x+1$
+  - One for $x$ values ranging from $0$ to $100$ with an increment of $1$
+  - Another for $y$ values that represent a quadratic function $y=0.5x^2+2x+1$
 - Plot the quadratic function using Matplotlib with appropriate labels and a legend
 - Add gridlines to the plot and display it with a line style of your choice
 - Save the plot as a PDF file named `quadratic_function.pdf`
