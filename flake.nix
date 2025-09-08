@@ -9,18 +9,18 @@
     flake-parts,
     ...
   }:
-    flake-parts.lib.mkFlake {inherit inputs;} {
+    flake-parts.lib.mkFlake {inherit inputs;} (let
+      assignments = [ ./assignment0 ];
+    in {
       systems = ["x86_64-linux"];
 
-      imports = map (x: localFlake: {perSystem = import x;}) [
-        ./assignment0
-      ];
+      imports = map (x: localFlake: {perSystem = import x;}) assignments;
 
-      perSystem = {system, ...}: let
-        defaultName = "assignment0";
+      perSystem = {pkgs, system, ...}: let
+        defaultName = builtins.head (builtins.sort (x: y: y < x) (map baseNameOf assignments));
       in {
         packages.default = self.packages.${system}.${defaultName};
-        devShells.defaultName = self.packages.${system}.${defaultName};
+        devShells.default = self.packages.${system}.${defaultName};
       };
-    };
+    });
 }

@@ -1,4 +1,5 @@
-(import ../nix/mkPythonFlakeModule.nix {
+{pkgs, ...}:
+(pkgs.callPackage (import ../nix/mkPythonFlakeModule.nix {
   pyproject = ./pyproject.toml;
   src = ./.;
-})
+}) {}).packages.converter

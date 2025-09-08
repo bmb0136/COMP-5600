@@ -4,7 +4,12 @@
   extraShellDeps ? pkgs: [],
   extraBuildDeps ? pkgs: [],
   extraDeps ? pkgs: [],
-}: {pkgs, ...}: let
+  notebook ? false,
+}: {
+  pkgs,
+  lib,
+  ...
+}: let
   project = (fromTOML (builtins.readFile pyproject)).project;
   dependencies = map (x: pkgs.python3.pkgs.${x}) project.dependencies;
   extra = extraDeps pkgs;
@@ -25,4 +30,19 @@ in {
       build-system = [setuptools];
       propagatedBuildInputs = dependencies ++ (extraBuildDeps pkgs) ++ extra;
     }) {};
+  packages."${project.name}-notebook" = lib.mkIf notebook (let
+    name = "${project.name}-notebook";
+    mainFile = builtins.replaceStrings ["."] ["/"] (builtins.head (lib.strings.splitString ":" project.scripts.${project.name}));
+    converter = pkgs.callPackage ../converter {};
+  in
+    pkgs.stdenv.mkDerivation {
+      inherit name src;
+      inherit (project) version;
+      buildPhase = ''
+        mkdir -p $out/bin
+        converter ${mainFile}.py $out/${name}.ipynb
+        jupyter execute $out/${name}.ipynb
+      '';
+      nativeBuildInputs = [converter pkgs.jupyter] ++ dependencies;
+    });
 }
