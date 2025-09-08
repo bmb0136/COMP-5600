@@ -39,7 +39,7 @@ in {
       inherit name src;
       inherit (project) version;
       buildPhase = ''
-        mkdir -p $out/bin
+        mkdir -p $out
         converter ${mainFile}.py $out/${name}.ipynb
         jupyter execute $out/${name}.ipynb
       '';
