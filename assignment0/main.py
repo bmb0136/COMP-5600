@@ -48,9 +48,35 @@ def problem2():
     ax.set_ylabel("Output")
     ax.plot(xs, ys)
     plt.savefig("sine_wave.png")
+    plt.close()
+
+"""
+# Problem 3
+
+- Create two NumPy arrays:
+    - One for $x$ values ranging from $0$ to $100$ with an increment of $1$
+    - Another for $y$ values that represent a quadratic function $y=0.5x^2+2x+1$
+- Plot the quadratic function using Matplotlib with appropriate labels and a legend
+- Add gridlines to the plot and display it with a line style of your choice
+- Save the plot as a PDF file named `quadratic_function.pdf`
+"""
+def problem3():
+    xs = np.arange(0, 101)
+    ys = np.array([0.5 * x**2 + 2*x + 1 for x in xs])
+    
+    ax = plt.axes()
+    ax.set_title("Quadratic")
+    ax.set_xlabel("Input")
+    ax.set_ylabel("Output")
+    ax.plot(xs, ys, label="0.5x^2+2x+1", color='orange')
+    ax.legend()
+    ax.grid()
+    plt.savefig("quadratic_function.pdf")
+    plt.close()
 
 def main():
     problem1()
     problem2()
+    problem3()
 if __name__ == "__main__":
     main()
