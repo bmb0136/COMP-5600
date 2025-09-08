@@ -30,7 +30,27 @@ def problem1():
     dot: float = np.dot(values2.transpose(), values2)[0][0]
     print(f"Dot product: {dot}")
 
+"""
+# Problem 2
+
+- Generate a set of $x$ values ranging from $0$ to $100$ with an increment of $0.1$ using NumPy
+- Compute the corresponding $y$ values using the function $y=sin(x)$
+- Plot the sine wave using Matplotlib, and add appropriate labels for the $x$-axis, $y$-axis, and a title for the plot
+- Save the plot as a PNG file named `sine_wave.png`
+"""
+def problem2():
+    xs = np.arange(0, 100.1, 0.1)
+    ys = np.sin(xs)
+
+    ax = plt.axes()
+    ax.set_title("Sine Wave")
+    ax.set_xlabel("Input")
+    ax.set_ylabel("Output")
+    ax.plot(xs, ys)
+    plt.savefig("sine_wave.png")
+
 def main():
     problem1()
+    problem2()
 if __name__ == "__main__":
     main()

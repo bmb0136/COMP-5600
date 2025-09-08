@@ -1,12 +1,13 @@
 {
   pyproject,
-  src
+  src,
+  extraShellDeps ? [],
 }: {pkgs, ...}: let
   project = (fromTOML (builtins.readFile pyproject)).project;
   dependencies = map (x: pkgs.python3.pkgs.${x}) project.dependencies;
 in {
   devShells.${project.name} = pkgs.mkShell {
-    packages = dependencies;
+    packages = dependencies ++ (extraShellDeps pkgs);
   };
   packages.${project.name} = pkgs.python3.pkgs.callPackage ({
     buildPythonPackage,

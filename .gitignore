@@ -2,3 +2,6 @@ result
 **/*~
 **/__pycache__/
 .ipynb_checkpoints/
+
+# A0 P2 output
+sine_wave.png
