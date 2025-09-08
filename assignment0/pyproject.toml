@@ -1,0 +1,10 @@
+[project]
+name = "assignment0"
+version = "0.1.0"
+dependencies = [
+  "numpy",
+  "matplotlib"
+]
+
+[project.scripts]
+cli = "main:main"

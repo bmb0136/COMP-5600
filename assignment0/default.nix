@@ -1,12 +1,4 @@
-{pkgs, ...}: let
-  python = pkgs.python3.withPackages (pp:
-    with pp; [
-      numpy
-      matplotlib
-    ]);
-in {
-  devShells.default = pkgs.mkShell {
-    packages = [python];
-  };
-  # packages.default = TODO;
-}
+(import ../nix/mkPythonFlakeModule.nix {
+  pyproject = ./pyproject.toml;
+  src = ./.;
+})
