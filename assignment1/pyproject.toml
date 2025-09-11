@@ -1,0 +1,10 @@
+[project]
+name = "assignment1"
+version = "0.1.0"
+dependencies = [
+  "matplotlib",
+  "networkx"
+]
+
+[project.scripts]
+assignment1 = "main:main"

@@ -10,7 +10,10 @@
     ...
   }:
     flake-parts.lib.mkFlake {inherit inputs;} (let
-      assignments = [ ./assignment0 ];
+      assignments = [
+        ./assignment0
+        ./assignment1
+      ];
     in {
       systems = ["x86_64-linux"];
 
