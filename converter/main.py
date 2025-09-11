@@ -22,7 +22,8 @@ class Parsed:
 
         cells = []
 
-        cells.append(_make_cell("code", "#Load libraries\n" + "\n".join([ast.unparse(x) for x in self.imports])))
+        if len(self.imports) > 0:
+            cells.append(_make_cell("code", "#Load libraries\n" + "\n".join([ast.unparse(x) for x in self.imports])))
 
         for docs, func in self.functions:
             cells.append(_make_cell(
