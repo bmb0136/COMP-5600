@@ -1,3 +1,9 @@
+from collections import deque
+import matplotlib.pyplot as plt
+import networkx as nx
+from collections import deque
+from networkx.drawing.nx_agraph import graphviz_layout
+
 """
 # **Water Jug Problem**
 
@@ -13,11 +19,11 @@ The state space is defined by the pair $(a, b)$ where:
 - $b$ is the current amount in Jug
 """
 def _init():
-    from collections import deque
-    import matplotlib.pyplot as plt
-    import networkx as nx
-    from collections import deque
-    from networkx.drawing.nx_agraph import graphviz_layout
+    global print_solution
+    global JUG_A_CAPACITY
+    global JUG_B_CAPACITY
+    global MAX_DEPTH
+    global GOAL_STATE
 
     # Constants
     JUG_A_CAPACITY = 4
@@ -47,6 +53,7 @@ This function defines the state transition model for the water jug problem. Give
 These transitions define the edges in the state space graph and are used by the search algorithm (e.g., BFS) to explore all reachable configurations from a given node. The function returns a list of unique successor states, ensuring that each represents a valid one-step move from the current state.
 """
 def _get_neighbors():
+    global get_neighbors
     def get_neighbors(state):
         """
         Returns all possible next states from the given state.
@@ -80,6 +87,8 @@ We build the entire state space graph by exploring all reachable states from the
 This allows for structural analysis and visualization of the complete search space, which is useful for comparing BFS with other algorithms later (e.g., DFS, UCS, A*).
 """
 def _ssgc():
+    global build_state_space
+    global draw_state_space
     def build_state_space(start):
         G = nx.DiGraph()
         queue = deque()
@@ -126,6 +135,7 @@ A depth limit (`MAX_DEPTH`) ensures the search remains bounded and avoids infini
 When the goal state is found, the function returns the entire sequence of states from start to goal, representing a valid solution path.
 """
 def _bfs():
+    global bfs
     def bfs(start_state):
         """
         Breadth-First Search to find a path from start_state to GOAL_STATE.
@@ -151,7 +161,10 @@ def _bfs():
 
         return None
 
-def _run():
+"""
+Run everything
+"""
+def run_everything():
     initial_state = (0, 0)
     state_graph = build_state_space(initial_state)
     draw_state_space(state_graph)
@@ -159,3 +172,13 @@ def _run():
     print("Solving the Water Jug problem using BFS...\n")
     solution_path = bfs(initial_state)
     print_solution(solution_path)
+
+def _run():
+    _init()
+    _get_neighbors()
+    _ssgc()
+    _bfs()
+    run_everything()
+
+def main():
+    _run()

@@ -11,13 +11,13 @@
   ...
 }: let
   project = (fromTOML (builtins.readFile pyproject)).project;
-  dependencies = map (x: pkgs.python3.pkgs.${x}) project.dependencies;
+  python = pkgs.python3.withPackages (pp: map (x: pp.${x}) project.dependencies);
   extra = extraDeps pkgs;
 in {
   devShells.${project.name} = pkgs.mkShell {
-    packages = dependencies ++ (extraShellDeps pkgs) ++ extra;
+    packages = (extraShellDeps pkgs) ++ extra ++ [python pkgs.jupyter];
   };
-  packages.${project.name} = pkgs.python3.pkgs.callPackage ({
+  packages.${project.name} = python.pkgs.callPackage ({
     buildPythonPackage,
     setuptools,
     ...
@@ -28,7 +28,7 @@ in {
       inherit src;
       pyproject = true;
       build-system = [setuptools];
-      propagatedBuildInputs = dependencies ++ (extraBuildDeps pkgs) ++ extra;
+      propagatedBuildInputs = (extraBuildDeps pkgs) ++ extra ++ [python];
     }) {};
   packages."${project.name}-notebook" = lib.mkIf notebook (let
     name = "${project.name}-notebook";
@@ -41,8 +41,7 @@ in {
       buildPhase = ''
         mkdir -p $out
         converter ${mainFile}.py $out/${name}.ipynb
-        jupyter execute $out/${name}.ipynb
       '';
-      nativeBuildInputs = [converter pkgs.jupyter] ++ dependencies;
+      nativeBuildInputs = [converter];
     });
 }

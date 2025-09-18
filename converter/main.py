@@ -22,16 +22,18 @@ class Parsed:
 
         cells = []
 
-        if len(self.imports) > 0:
-            cells.append(_make_cell("code", "#Load libraries\n" + "\n".join([ast.unparse(x) for x in self.imports])))
-
+        i = 0
         for docs, func in self.functions:
             cells.append(_make_cell(
                 "markdown",
                 cast(ast.Constant, cast(ast.Expr, docs).value).value))
+            lines = [ast.unparse(x) for x in cast(ast.FunctionDef, func).body if type(x) is not ast.Global]
+            if i == 0 and len(self.imports) > 0:
+                lines = [ast.unparse(x) for x in self.imports] + [""] + lines
             cells.append(_make_cell(
                 "code",
-                "\n".join([ast.unparse(x) for x in cast(ast.FunctionDef, func).body])))
+                "\n".join(lines)))
+            i += 1
 
         return {
             "metadata": {

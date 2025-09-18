@@ -3,7 +3,8 @@ name = "assignment1"
 version = "0.1.0"
 dependencies = [
   "matplotlib",
-  "networkx"
+  "networkx",
+  "scipy"
 ]
 
 [project.scripts]
