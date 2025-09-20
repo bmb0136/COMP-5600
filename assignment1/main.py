@@ -4,6 +4,7 @@ import networkx as nx
 from collections import deque
 from math import inf
 import heapq
+import time
 
 """
 # **Water Jug Problem**
@@ -137,7 +138,7 @@ When the goal state is found, the function returns the entire sequence of states
 """
 def _bfs():
     global bfs
-    def bfs(start_state):
+    def bfs(start_state, log={}):
         """
         Breadth-First Search to find a path from start_state to GOAL_STATE.
         """
@@ -154,6 +155,7 @@ def _bfs():
             visited.add(current_state)
 
             if current_state == GOAL_STATE:
+                log["expanded"] = len(visited)
                 return path
 
             for neighbor in get_neighbors(current_state):
@@ -167,7 +169,7 @@ def _bfs():
 """
 def _dfs():
     global dfs
-    def dfs(start_state):
+    def dfs(start_state, log={}):
         queue = []
         queue.append((start_state, [start_state]))  # (current state, path taken)
         visited = set()
@@ -181,6 +183,7 @@ def _dfs():
             visited.add(current_state)
 
             if current_state == GOAL_STATE:
+                log["expanded"] = len(visited)
                 return path
 
             for neighbor in get_neighbors(current_state):
@@ -193,7 +196,7 @@ def _dfs():
 """
 def _ucs():
     global ucs
-    def ucs(start_state):
+    def ucs(start_state, log={}):
         queue = [(0, start_state)]
         seen = {start_state: (0, None)}
         while queue:
@@ -207,6 +210,7 @@ def _ucs():
                 path.reverse()
                 assert path[0] == start_state
                 assert path[-1] == GOAL_STATE
+                log["expanded"] = len(seen)
                 return path
 
             for neighbor in get_neighbors(current_state):
@@ -322,7 +326,7 @@ def _a_star():
                 self._heapify_down(i)
             #self._validate()
 
-    def a_star(state_graph, start_state, h):
+    def a_star(state_graph, start_state, h, log={}):
         ipq = IPQ()
         dist = {}
         parents = {}
@@ -355,6 +359,7 @@ def _a_star():
                 path.reverse()
                 assert path[0] == start_state
                 assert path[-1] == GOAL_STATE
+                log["expanded"] = len(seen)
                 return path
             for neighbor in get_neighbors(current_state):
                 if neighbor == current_state:
@@ -364,22 +369,29 @@ def _a_star():
             seen.add(current_state)
 
     def h1(state):
-        """
-        Total difference in water volume
-
-        This is admissible because it represents the minimum amount of water that needs to be moved
-        """
         return sum(abs(x - y) for x, y in zip(state, GOAL_STATE))
     def h2(state):
-        """
-        Number of jugs with the incorrect amount of water
-
-        This is admissible because at least one step is needed per incorrect jug
-        """
         return sum(1 for x, y in zip(state, GOAL_STATE) if x != y)
 
 """
-Run everything
+# Run everything
+
+## Write up
+
+### Heuristics
+
+- `h1`: Total difference in water volume. This is admissible because it represents the minimum amount of water that needs to be moved
+- `h2`: Number of jugs with the incorrect amount of water. This is admissible because at least one step is needed per incorrect jug
+
+### Performance
+
+| Algorithm | Nodes Expanded | Solution Length | Execution Time |
+|-|-|-|-|
+|BFS|X|Y|Z|
+|DFS|X|Y|Z|
+|UCS|X|Y|Z|
+|A\* (`h1`)|X|Y|Z|
+|A\* (`h2`)|X|Y|Z|
 """
 def run_everything():
     initial_state = (0, 0)
@@ -388,23 +400,43 @@ def run_everything():
     initial_state = (0, 0)
 
     print("Solving the Water Jug problem using BFS...\n")
-    solution_path = bfs(initial_state)
+    log = {}
+    start = time.time()
+    solution_path = bfs(initial_state, log)
+    delta_t = time.time() - start
+    print(f"Took {delta_t} seconds, expanded {log["expanded"]} nodes")
     print_solution(solution_path)
 
     print("Solving the Water Jug problem using DFS...\n")
-    solution_path = dfs(initial_state)
+    log = {}
+    start = time.time()
+    solution_path = dfs(initial_state, log)
+    delta_t = time.time() - start
+    print(f"Took {delta_t} seconds, expanded {log["expanded"]} nodes")
     print_solution(solution_path)
 
     print("Solving the Water Jug problem using UCS...\n")
-    solution_path = ucs(initial_state)
+    log = {}
+    start = time.time()
+    solution_path = ucs(initial_state, log)
+    delta_t = time.time() - start
+    print(f"Took {delta_t} seconds, expanded {log["expanded"]} nodes")
     print_solution(solution_path)
 
     print("Solving the Water Jug problem using A* (h1)...\n")
-    solution_path = a_star(state_graph, initial_state, h1)
+    log = {}
+    start = time.time()
+    solution_path = a_star(state_graph, initial_state, h1, log)
+    delta_t = time.time() - start
+    print(f"Took {delta_t} seconds, expanded {log["expanded"]} nodes")
     print_solution(solution_path)
 
     print("Solving the Water Jug problem using A* (h2)...\n")
-    solution_path = a_star(state_graph, initial_state, h2)
+    log = {}
+    start = time.time()
+    solution_path = a_star(state_graph, initial_state, h2, log)
+    delta_t = time.time() - start
+    print(f"Took {delta_t} seconds, expanded {log["expanded"]} nodes")
     print_solution(solution_path)
 
 def _run():
