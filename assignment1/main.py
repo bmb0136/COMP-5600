@@ -1,8 +1,7 @@
-from collections import deque
+from collections import defaultdict, deque
 import matplotlib.pyplot as plt
 import networkx as nx
 from collections import deque
-from networkx.drawing.nx_agraph import graphviz_layout
 
 """
 # **Water Jug Problem**
@@ -162,6 +161,73 @@ def _bfs():
         return None
 
 """
+# DFS
+"""
+def _dfs():
+    global dfs
+    def dfs(start_state):
+        queue = []
+        queue.append((start_state, [start_state]))  # (current state, path taken)
+        visited = set()
+
+        while queue:
+            current_state, path = queue.pop()
+
+            if current_state in visited or len(path) > MAX_DEPTH:
+                continue
+
+            visited.add(current_state)
+
+            if current_state == GOAL_STATE:
+                return path
+
+            for neighbor in get_neighbors(current_state):
+                if neighbor not in visited:
+                    queue.append((neighbor, path + [neighbor]))
+
+        return None
+
+"""
+Run A*
+"""
+def _a_star():
+    global a_star
+    global h1
+    global h2
+    def a_star(state_graph, start_state, h):
+        open = set()
+        open.add(start_state)
+        previous = {}
+        g = defaultdict(lambda: float('inf'))
+        f = defaultdict(lambda: float('inf'))
+        g[start_state] = 0
+        f[start_state] = h(start_state)
+
+        while len(open) > 0:
+            current_state = min(f.keys(), key=lambda n: f[n])
+            print(current_state)
+            if current_state == GOAL_STATE:
+                assert False, "FOUND"
+            if current_state in open:
+                open.remove(current_state)
+
+            for neighbor in get_neighbors(current_state):
+                d = 1
+                s = g[current_state] + d
+                if s < g[neighbor]:
+                    previous[neighbor] = current_state
+                    g[neighbor] = s
+                    f[neighbor] = s + h(neighbor)
+                    if neighbor not in open:
+                        open.add(neighbor)
+
+    def h1(state):
+        return abs(state[0] - GOAL_STATE[0]) + abs(state[1] - GOAL_STATE[1])
+
+    def h2(state):
+        assert False, "TODO"
+
+"""
 Run everything
 """
 def run_everything():
@@ -169,8 +235,17 @@ def run_everything():
     state_graph = build_state_space(initial_state)
     draw_state_space(state_graph)
     initial_state = (0, 0)
+
     print("Solving the Water Jug problem using BFS...\n")
     solution_path = bfs(initial_state)
+    print_solution(solution_path)
+
+    print("Solving the Water Jug problem using DFS...\n")
+    solution_path = dfs(initial_state)
+    print_solution(solution_path)
+
+    print("Solving the Water Jug problem using A* (h1)...\n")
+    solution_path = a_star(state_graph, initial_state, h1)
     print_solution(solution_path)
 
 def _run():
@@ -178,6 +253,8 @@ def _run():
     _get_neighbors()
     _ssgc()
     _bfs()
+    _dfs()
+    _a_star()
     run_everything()
 
 def main():
