@@ -2,6 +2,7 @@ from collections import defaultdict, deque
 import matplotlib.pyplot as plt
 import networkx as nx
 from collections import deque
+from math import inf
 
 """
 # **Water Jug Problem**
@@ -194,38 +195,159 @@ def _a_star():
     global a_star
     global h1
     global h2
+    class IPQ:
+        def __init__(self):
+            self.count = 0
+            self.heap = []
+            self.indices = {}
+
+        def _validate(self):
+            print(self.heap)
+            print(self.indices)
+            s = [0]
+            while s:
+                i = s.pop()
+                L = (2 * i) + 1
+                R = (2 * i) + 2
+                if L < self.count:
+                    assert self.heap[i][1] <= self.heap[L][1], f"{self.heap[i]} > {self.heap[L]}"
+                    s.append(L)
+                if R < self.count:
+                    assert self.heap[i][1] <= self.heap[R][1], f"{self.heap[i]} > {self.heap[R]}"
+                    s.append(R)
+            for i, t in enumerate(self.heap):
+                assert self.indices[t[0]] == i, f"self.indices was wrong for {t}"
+
+
+        def _compare(self, i, j):
+            assert i >= 0 and i < self.count
+            assert j >= 0 and j < self.count
+            return self.heap[i][1] - self.heap[j][1]
+
+        def _swap(self, i, j):
+            assert i >= 0 and i < self.count
+            assert j >= 0 and j < self.count
+            if i == j:
+                return
+            x, _ = self.heap[i]
+            y, _ = self.heap[j]
+            self.heap[i], self.heap[j] = self.heap[j], self.heap[i]
+            self.indices[x], self.indices[y] = self.indices[y], self.indices[x]
+
+        def _heapify_down(self, i):
+            assert i >= 0 and i < self.count
+            while i < self.count:
+                smallest = i
+                L = (2 * i) + 1
+                R = (2 * i) + 2
+
+                if L < self.count and self._compare(L, smallest) < 0:
+                    smallest = L
+                if R < self.count and self._compare(R, smallest) < 0:
+                    smallest = R
+
+                if smallest == i:
+                    break
+
+                self._swap(i, smallest)
+                i = smallest
+
+        def _heapify_up(self, i):
+            while i >= 0:
+                p = (i - 1) // 2
+                if p >= 0 and self._compare(i, p) < 0:
+                    self._swap(i, p)
+                    i = p
+                else:
+                    break
+
+        def pop(self):
+            assert self.count > 0
+            x, _ = self.heap[0]
+            self._swap(0, self.count - 1)
+            self.heap.pop()
+            del self.indices[x]
+            self.count -= 1
+            if self.count > 0:
+                self._heapify_down(0)
+            #self._validate()
+            return x
+
+        def push(self, x, priority):
+            assert x not in self.indices
+            self.heap.append((x, priority))
+            self.indices[x] = self.count
+            self.count += 1
+            self._heapify_up(self.count - 1)
+            #self._validate()
+
+        def update_priority(self, x, priority):
+            assert x in self.indices
+            i = self.indices[x]
+            old_priority = self.heap[i][1]
+            self.heap[i] = (self.heap[i][0], priority)
+
+            if priority < old_priority:
+                self._heapify_up(i)
+            else:
+                self._heapify_down(i)
+            #self._validate()
+
     def a_star(state_graph, start_state, h):
-        open = set()
-        open.add(start_state)
-        previous = {}
-        g = defaultdict(lambda: float('inf'))
-        f = defaultdict(lambda: float('inf'))
-        g[start_state] = 0
-        f[start_state] = h(start_state)
+        ipq = IPQ()
+        dist = {}
+        parents = {}
+        seen = set([start_state])
 
-        while len(open) > 0:
-            current_state = min(f.keys(), key=lambda n: f[n])
-            print(current_state)
+        def relax(current_state, neighbor):
+            # Since our state space is a unweighted graph, assume an edge weight of 1
+            EDGE_WEIGHT = 1
+            g = dist[current_state] + EDGE_WEIGHT
+            if g < dist[neighbor]:
+                parents[neighbor] = current_state
+                dist[neighbor] = g
+                ipq.update_priority(neighbor, g + h(neighbor))
+
+        for x in state_graph:
+            ipq.push(x, inf)
+            dist[x] = inf
+
+        ipq.update_priority(start_state, h(start_state))
+        dist[start_state] = 0
+        while ipq.count > 0:
+            current_state = ipq.pop()
             if current_state == GOAL_STATE:
-                assert False, "FOUND"
-            if current_state in open:
-                open.remove(current_state)
-
+                path = []
+                while True:
+                    path.append(current_state)
+                    if current_state not in parents:
+                        break
+                    current_state = parents[current_state]
+                path.reverse()
+                assert path[0] == start_state
+                assert path[-1] == GOAL_STATE
+                return path
             for neighbor in get_neighbors(current_state):
-                d = 1
-                s = g[current_state] + d
-                if s < g[neighbor]:
-                    previous[neighbor] = current_state
-                    g[neighbor] = s
-                    f[neighbor] = s + h(neighbor)
-                    if neighbor not in open:
-                        open.add(neighbor)
+                if neighbor == current_state:
+                    continue
+                if neighbor not in seen:
+                    relax(current_state, neighbor)
+            seen.add(current_state)
 
     def h1(state):
-        return abs(state[0] - GOAL_STATE[0]) + abs(state[1] - GOAL_STATE[1])
+        """
+        Total difference in water volume
 
+        This is admissible because it represents the minimum amount of water that needs to be moved
+        """
+        return sum(abs(x - y) for x, y in zip(state, GOAL_STATE))
     def h2(state):
-        assert False, "TODO"
+        """
+        Number of jugs with the incorrect amount of water
+
+        This is admissible because at least one step is needed per incorrect jug
+        """
+        return sum(1 for x, y in zip(state, GOAL_STATE) if x != y)
 
 """
 Run everything
@@ -233,7 +355,7 @@ Run everything
 def run_everything():
     initial_state = (0, 0)
     state_graph = build_state_space(initial_state)
-    draw_state_space(state_graph)
+    #draw_state_space(state_graph)
     initial_state = (0, 0)
 
     print("Solving the Water Jug problem using BFS...\n")
@@ -246,6 +368,10 @@ def run_everything():
 
     print("Solving the Water Jug problem using A* (h1)...\n")
     solution_path = a_star(state_graph, initial_state, h1)
+    print_solution(solution_path)
+
+    print("Solving the Water Jug problem using A* (h2)...\n")
+    solution_path = a_star(state_graph, initial_state, h2)
     print_solution(solution_path)
 
 def _run():
