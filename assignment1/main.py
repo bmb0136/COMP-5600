@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 from collections import deque
 from math import inf
+import heapq
 
 """
 # **Water Jug Problem**
@@ -187,9 +188,37 @@ def _dfs():
                     queue.append((neighbor, path + [neighbor]))
 
         return None
+"""
+# UCS
+"""
+def _ucs():
+    global ucs
+    def ucs(start_state):
+        queue = [(0, start_state)]
+        seen = {start_state: (0, None)}
+        while queue:
+            cost, current_state = heapq.heappop(queue)
+
+            if current_state == GOAL_STATE:
+                path = []
+                while current_state in seen:
+                    path.append(current_state)
+                    current_state = seen[current_state][1]
+                path.reverse()
+                assert path[0] == start_state
+                assert path[-1] == GOAL_STATE
+                return path
+
+            for neighbor in get_neighbors(current_state):
+                # State space is unweighted, use cost of 1 between nodes
+                neighbor_cost = cost + 1
+                if neighbor not in seen or neighbor_cost < seen[neighbor][0]:
+                    seen[neighbor] = (neighbor_cost, current_state)
+                    heapq.heappush(queue, (neighbor_cost, neighbor))
+        return None
 
 """
-Run A*
+# A*
 """
 def _a_star():
     global a_star
@@ -355,7 +384,7 @@ Run everything
 def run_everything():
     initial_state = (0, 0)
     state_graph = build_state_space(initial_state)
-    #draw_state_space(state_graph)
+    draw_state_space(state_graph)
     initial_state = (0, 0)
 
     print("Solving the Water Jug problem using BFS...\n")
@@ -364,6 +393,10 @@ def run_everything():
 
     print("Solving the Water Jug problem using DFS...\n")
     solution_path = dfs(initial_state)
+    print_solution(solution_path)
+
+    print("Solving the Water Jug problem using UCS...\n")
+    solution_path = ucs(initial_state)
     print_solution(solution_path)
 
     print("Solving the Water Jug problem using A* (h1)...\n")
@@ -381,6 +414,7 @@ def _run():
     _bfs()
     _dfs()
     _a_star()
+    _ucs()
     run_everything()
 
 def main():
