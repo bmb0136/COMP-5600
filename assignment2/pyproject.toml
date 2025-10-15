@@ -1,0 +1,11 @@
+[project]
+name = "assignment2"
+version = "0.1.0"
+dependencies = [
+  "opencv-python",
+  "numpy",
+  "pandas"
+]
+
+[project.scripts]
+assignment2 = "main:main"

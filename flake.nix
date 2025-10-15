@@ -13,6 +13,7 @@
       assignments = [
         ./assignment0
         ./assignment1
+        ./assignment2
       ];
     in {
       systems = ["x86_64-linux"];
