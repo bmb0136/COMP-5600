@@ -4,7 +4,8 @@ version = "0.1.0"
 dependencies = [
   "opencv-python",
   "numpy",
-  "pandas"
+  "pandas",
+  "scikit-learn"
 ]
 
 [project.scripts]
