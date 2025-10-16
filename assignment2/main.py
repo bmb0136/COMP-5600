@@ -24,11 +24,6 @@ import matplotlib.pyplot as plt
 - Bayes had better recall and f1
 - Logistic Regression would be better overall for this dataset because it doesnt assume independence
 
-## Insights
-
-- `np.dot` can cause the entire program to hang for some reason
-- Gradient descent is very sensitive to the learning rate chosen: too high and the loss can actually go back up, too low and it will take forever to converge
-
 ```
 --------------------------
 Logistic Regression stats:
@@ -47,9 +42,11 @@ f1          0.7157017931269043
 roc_auc     0.718
 --------------------------
 ```
+
 ## Insights
 
-- TODO
+- `np.dot` can cause the entire program to hang for some reason
+- Gradient descent is very sensitive to the learning rate chosen: too high and the loss can actually go back up, too low and it will take forever to converge
 """
 def problem1():
     df = pd.read_csv("WA_Fn-UseC_-Telco-Customer-Churn.csv")
