@@ -1,13 +1,11 @@
 from collections import Counter
-from math import exp
 import random
-import time
 import numpy as np
 import pandas as pd
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from sklearn.model_selection import StratifiedKFold
 import cv2
-import sys
+import matplotlib.pyplot as plt
 
 """
 # Problem 1
@@ -114,7 +112,7 @@ def problem1():
             for c in classes:
                 prob = class_priors[c]
                 for j, val in enumerate(x):
-                    prob *= conditional_probs[c][j].get(val, 1e-6)
+                    prob *= conditional_probs[c][j].get(val, 0.000001)
                 class_scores[c] = prob
             predictions.append(max(class_scores, key=class_scores.get))
         return np.array(predictions)
@@ -146,18 +144,56 @@ def problem1():
     print("--------------------------")
     print("Logistic Regression stats:")
     for k, v in m.items():
-        print(f"{k:<12}:{np.mean(v)}")
+        print(f"{k:<12}{np.mean(v)}")
     print("--------------------------")
 
     m = cross_validate(XS, YS, 5, train_bayes, eval_bayes)
     print("--------------------------")
     print("Bayes stats:")
     for k, v in m.items():
-        print(f"{k:<12}:{np.mean(v)}")
+        print(f"{k:<12}{np.mean(v)}")
     print("--------------------------")
 
+"""
+# Problem 2
+"""
 def problem2():
-    pass
+    img = cv2.cvtColor(cv2.imread("test_image.png"), cv2.COLOR_BGR2RGB)
+    new_img = np.zeros(shape=img.shape).astype(np.uint8)
+
+    pixels = np.array(img).reshape((-1, 3))
+
+    K = 10
+    ITERS = 100
+
+    centers = random.sample(list(pixels), k=K)
+    for i in range(ITERS):
+        if i % (ITERS // 50) == 0:
+            print(".", end="", flush=True)
+
+        clusters = [[] for _ in range(K)]
+        for p in pixels:
+            clusters[np.argmin([np.linalg.norm(p - c) for c in centers])].append(p)
+        centers = [np.mean(c, axis=0) for c in clusters]
+    print()
+    
+    new_img = np.array([centers[np.argmin([np.linalg.norm(p - c) for c in centers])] for p in pixels]).reshape(img.shape).astype(np.uint8)
+
+    plt.figure(figsize=(10, 5))
+
+    plt.subplot(1, 2, 1)
+    plt.title("Original Image")
+    plt.imshow(img)
+    plt.axis("off")
+
+    plt.subplot(1, 2, 2)
+    plt.title("New Image")
+    plt.imshow(new_img)
+    plt.axis("off")
+
+    plt.tight_layout()
+    plt.savefig("kmeans.png")
+    plt.show()
 
 def main():
     problem1()
