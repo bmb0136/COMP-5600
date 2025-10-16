@@ -9,6 +9,47 @@ import matplotlib.pyplot as plt
 
 """
 # Problem 1
+
+## Preprocessing
+
+- Customer ID was ignored
+- Binary attributes were converted to 0/1
+- No internet/phone was replaced with zero
+- Blanks in Total Charges was replaced with zero
+- Unbounded attributes were normalized using z-score
+
+## Performance
+
+- Logistic had better accuracy, precision, and ROC AUC
+- Bayes had better recall and f1
+- Logistic Regression would be better overall for this dataset because it doesnt assume independence
+
+## Insights
+
+- `np.dot` can cause the entire program to hang for some reason
+- Gradient descent is very sensitive to the learning rate chosen: too high and the loss can actually go back up, too low and it will take forever to converge
+
+```
+--------------------------
+Logistic Regression stats:
+accuracy    0.73
+precision   0.8158614432882031
+recall      0.6000000000000001
+f1          0.6894644210000015
+roc_auc     0.8353999999999999
+--------------------------
+--------------------------
+Bayes stats:
+accuracy    0.718
+precision   0.7200113811080433
+recall      0.712
+f1          0.7157017931269043
+roc_auc     0.718
+--------------------------
+```
+## Insights
+
+- TODO
 """
 def problem1():
     df = pd.read_csv("WA_Fn-UseC_-Telco-Customer-Churn.csv")
@@ -25,6 +66,18 @@ def problem1():
 
     # Fix blanks
     df["TotalCharges"] = df["TotalCharges"].replace({" ": 0.})
+    
+    # Fix "No internet service" and "No phone service"
+    # Replace with zeros since:
+    # - You cant have "OnlineSecurity" through "StreamingMovies" if you dont have internet
+    # - If you have zero phone lines that's not multiple lines
+    for col in ["OnlineSecurity", "OnlineBackup", "DeviceProtection", "TechSupport", "StreamingTV", "StreamingMovies", "MultipleLines"]:
+        df[col] = df[col].replace({"No internet service": 0., "No phone service": 0.})
+    
+    # Normalize unbounded columns
+    for col in ["tenure", "MonthlyCharges", "TotalCharges"]:
+        df[col] = pd.to_numeric(df[col])
+        df[col] = (df[col] - df[col].mean()) / df[col].std()
 
     # Ensure there are an even number of Yes/No churn values (prevent bias)
     yeses = df[df["Churn"] == 1]
@@ -41,18 +94,6 @@ def problem1():
     count = 250
 
     df = pd.concat([yeses.sample(n=count, replace=False, random_state=69), nos.sample(n=count, replace=False, random_state=67)])
-    
-    # Fix "No internet service" and "No phone service"
-    # Replace with zeros since:
-    # - You cant have "OnlineSecurity" through "StreamingMovies" if you dont have internet
-    # - If you have zero phone lines that's not multiple lines
-    for col in ["OnlineSecurity", "OnlineBackup", "DeviceProtection", "TechSupport", "StreamingTV", "StreamingMovies", "MultipleLines"]:
-        df[col] = df[col].replace({"No internet service": 0., "No phone service": 0.})
-    
-    # Normalize unbounded columns
-    for col in ["tenure", "MonthlyCharges", "TotalCharges"]:
-        df[col] = pd.to_numeric(df[col])
-        df[col] = (df[col] - df[col].mean()) / df[col].std()
 
     # Ignored columns: Churn, customerId
     NUM_FEATURES = df.shape[1] - 2
