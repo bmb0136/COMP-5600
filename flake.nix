@@ -14,6 +14,7 @@
         ./assignment0
         ./assignment1
         ./assignment2
+        ./assignment4
       ];
     in {
       systems = ["x86_64-linux"];
